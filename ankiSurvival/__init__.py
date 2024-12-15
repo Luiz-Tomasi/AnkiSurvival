@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QLabel, QMainWindow, QDockWidget
-from PyQt6.QtGui import QPainter, QPixmap
+from PyQt6.QtGui import QPainter, QPixmap, QMovie
 from PyQt6.QtCore import Qt, QTimer, QPoint
 from aqt import mw
 
@@ -13,7 +13,7 @@ class ZombieGame(QLabel):
         self.timer.start(50)  # Atualiza a cada 50ms
 
         # Configurando o fundo
-        self.setPixmap(QPixmap("assets/background.png"))
+        self.setPixmap(QPixmap("./ankiSurvival/assets/background.png"))
 
     def spawn_zombie(self):
         """Adiciona um novo zumbi na tela."""
@@ -32,12 +32,12 @@ class ZombieGame(QLabel):
     def paintEvent(self, event):
         """Desenha os zumbis na tela."""
         painter = QPainter(self)
-        if len(self.zombies) == 0:
-            print("Nenhum zumbi para renderizar.")  # Depuração
+        zombie_pixmap = QPixmap("./ankiSurvival/assets/Zombie.gif")
+
+        if zombie_pixmap.isNull():
+            print("Erro ao carregar a imagem do zumbi!")  # Depuração
         for zombie in self.zombies:
-            painter.drawPixmap(
-                zombie["position"], QPixmap("assets/Zombie.gif")
-            )
+            painter.drawPixmap(zombie["position"], zombie_pixmap)
 
 
 def run_zombies():
