@@ -81,7 +81,10 @@ def run_zombies():
 
     # Adiciona o dock widget à janela principal
     mw.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, dock)
-    game_window.spawn_zombie()
+
+    # Spawn 5 zumbis
+    for _ in range(5):
+        game_window.spawn_zombie()
 
 
 # Executa o jogo
