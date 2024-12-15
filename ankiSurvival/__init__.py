@@ -1,5 +1,6 @@
+import random
 from PyQt6.QtWidgets import QLabel, QMainWindow, QDockWidget
-from PyQt6.QtGui import QPainter, QPixmap, QMovie
+from PyQt6.QtGui import QPainter, QPixmap
 from PyQt6.QtCore import Qt, QTimer, QPoint
 from aqt import mw
 
@@ -16,17 +17,45 @@ class ZombieGame(QLabel):
         self.setPixmap(QPixmap("./ankiSurvival/assets/background.png"))
 
     def spawn_zombie(self):
-        """Adiciona um novo zumbi na tela."""
-        zombie = {"position": QPoint(0, 50), "speed": 5}
+        """Adiciona um novo zumbi na tela com direção aleatória em X e Y."""
+        # Direção aleatória para o movimento em X e Y
+        direction_x = random.choice([-1, 1])  # Direção horizontal (esquerda ou direita)
+        direction_y = random.choice([-1, 1])  # Direção vertical (cima ou baixo)
+        zombie = {
+            "position": QPoint(random.randint(0, self.width()), random.randint(50, self.height() - 50)),
+            "speed_x": random.randint(3, 6),  # Velocidade aleatória horizontal
+            "speed_y": random.randint(3, 6),  # Velocidade aleatória vertical
+            "direction_x": direction_x,  # Direção horizontal aleatória
+            "direction_y": direction_y   # Direção vertical aleatória
+        }
         self.zombies.append(zombie)
         print(f"Zumbi spawnado: {len(self.zombies)} zumbis atualmente.")  # Depuração
 
     def update_zombies(self):
-        """Atualiza a posição dos zumbis."""
+        """Atualiza a posição dos zumbis e garante que não saiam da tela."""
         for zombie in self.zombies:
-            zombie["position"].setX(zombie["position"].x() + zombie["speed"])
-            if zombie["position"].x() > self.width():  # Se o zumbi saiu da tela
-                print(f"Zumbi fora da tela: {zombie['position']}")  # Depuração
+            # Movimento aleatório em X e Y
+            zombie["position"].setX(zombie["position"].x() + zombie["speed_x"] * zombie["direction_x"])
+            zombie["position"].setY(zombie["position"].y() + zombie["speed_y"] * zombie["direction_y"])
+
+            # Garantir que o zumbi não saia da tela horizontalmente
+            if zombie["position"].x() < 0:  # Se o zumbi estiver saindo da tela pela esquerda
+                zombie["position"].setX(0)
+                zombie["direction_x"] = 1  # Muda a direção para a direita
+
+            if zombie["position"].x() > self.width():  # Se o zumbi estiver saindo da tela pela direita
+                zombie["position"].setX(self.width())
+                zombie["direction_x"] = -1  # Muda a direção para a esquerda
+
+            # Garantir que o zumbi não saia da tela verticalmente
+            if zombie["position"].y() < 0:  # Se o zumbi estiver saindo da tela pela parte superior
+                zombie["position"].setY(0)
+                zombie["direction_y"] = 1  # Muda a direção para baixo
+
+            if zombie["position"].y() > self.height():  # Se o zumbi estiver saindo da tela pela parte inferior
+                zombie["position"].setY(self.height())
+                zombie["direction_y"] = -1  # Muda a direção para cima
+
         self.repaint()
 
     def paintEvent(self, event):
@@ -36,6 +65,7 @@ class ZombieGame(QLabel):
 
         if zombie_pixmap.isNull():
             print("Erro ao carregar a imagem do zumbi!")  # Depuração
+
         for zombie in self.zombies:
             painter.drawPixmap(zombie["position"], zombie_pixmap)
 
