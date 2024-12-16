@@ -1,8 +1,9 @@
+from aqt import mw
+from aqt import gui_hooks
 import random
 from PyQt6.QtWidgets import QLabel, QMainWindow, QDockWidget
 from PyQt6.QtGui import QPainter, QPixmap
 from PyQt6.QtCore import Qt, QTimer, QPoint
-from aqt import mw
 
 
 class ZombieGame(QLabel):
@@ -30,6 +31,14 @@ class ZombieGame(QLabel):
         }
         self.zombies.append(zombie)
         print(f"Zumbi spawnado: {len(self.zombies)} zumbis atualmente.")  # Depuração
+
+    def delete_zombie(self):
+        """Remove o último zumbi da lista, se houver algum."""
+        if self.zombies:
+            self.zombies.pop()
+            print(f"Zumbi removido! Restam {len(self.zombies)} zumbis.")
+        else:
+            print("Nenhum zumbi para remover.")  # Depuração
 
     def update_zombies(self):
         """Atualiza a posição dos zumbis e garante que não saiam da tela."""
@@ -86,6 +95,33 @@ def run_zombies():
     for _ in range(5):
         game_window.spawn_zombie()
 
+    return game_window  # Retorna a instância do jogo
 
-# Executa o jogo
-run_zombies()
+
+# Variável global para manter a instância do jogo
+game_window = run_zombies()
+
+
+
+
+#def shownCard(card):
+  #print("question shown, card question is:", card.q()) // in case you want to do something when a card appears
+#gui_hooks.reviewer_did_show_question.append(shownCard)
+
+from aqt import gui_hooks
+from aqt.reviewer import Reviewer
+
+
+def on_card_answered(reviewer, card, ease):
+    # Verifica o valor do ease e spawna um zumbi
+    if ease == 1:
+        game_window.spawn_zombie()
+    elif ease == 2:
+        game_window.spawn_zombie()
+    elif ease == 3:
+        game_window.delete_zombie()
+    elif ease == 4:
+        game_window.delete_zombie()
+
+# Registra a função no hook
+gui_hooks.reviewer_did_answer_card.append(on_card_answered)
