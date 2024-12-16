@@ -2,7 +2,7 @@ from aqt import mw
 from aqt import gui_hooks
 import random
 from PyQt6.QtWidgets import QLabel, QMainWindow, QDockWidget
-from PyQt6.QtGui import QPainter, QPixmap, QMovie, QBrush
+from PyQt6.QtGui import QPainter, QPixmap, QMovie, QBrush, QPen
 from PyQt6.QtCore import Qt, QTimer, QPoint
 
 
@@ -87,14 +87,38 @@ class ZombieGame(QLabel):
 
         self.repaint()
 
+    def get_closest_zombie_to_center(self):
+        """Retorna o zumbi mais próximo do centro do mapa."""
+        if not self.zombies:
+            return None
+
+        center = QPoint(self.width() // 2, self.height() // 2)
+        closest_zombie = min(
+            self.zombies,
+            key=lambda z: (z["position"].x() - center.x()) ** 2 + (z["position"].y() - center.y()) ** 2
+        )
+        return closest_zombie
+
     def paintEvent(self, event):
-        """Desenha os zumbis na tela."""
+        """Desenha os zumbis na tela e a linha vermelha."""
         painter = QPainter(self)
 
+        # Desenha os zumbis
         for zombie in self.zombies:
-            # Desenha a posição atual do frame do GIF usando QMovie
             current_frame = self.zombie_movie.currentPixmap()
             painter.drawPixmap(zombie["position"], current_frame)
+
+        # Desenha a linha até o zumbi mais próximo
+        closest_zombie = self.get_closest_zombie_to_center()
+        if closest_zombie:
+            center = QPoint(self.width() // 2, self.height() // 2)
+
+            # Configura o estilo da linha vermelha
+            pen = QPen(Qt.GlobalColor.red, 2)
+            painter.setPen(pen)
+
+            # Desenha a linha
+            painter.drawLine(center, closest_zombie["position"])
 
 
 def run_zombies():
