@@ -6,6 +6,7 @@ from PyQt6.QtGui import QPainter, QPixmap, QMovie, QBrush
 from PyQt6.QtCore import Qt, QTimer, QPoint
 
 
+
 class ZombieGame(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -36,14 +37,15 @@ class ZombieGame(QLabel):
 
     def spawn_zombie(self):
         """Adiciona um novo zumbi na tela com direção aleatória em X e Y."""
+        visible_height = self.height() - self.zombie_counter_label.height() - 10  # Ajuste para área visível
         direction_x = random.choice([-1, 1])  # Direção horizontal (esquerda ou direita)
         direction_y = random.choice([-1, 1])  # Direção vertical (cima ou baixo)
         zombie = {
-            "position": QPoint(random.randint(0, self.width()), random.randint(50, self.height() - 50)),
+            "position": QPoint(random.randint(0, self.width()), random.randint(50, visible_height)),
             "speed_x": random.randint(3, 6),  # Velocidade aleatória horizontal
             "speed_y": random.randint(3, 6),  # Velocidade aleatória vertical
             "direction_x": direction_x,  # Direção horizontal aleatória
-            "direction_y": direction_y   # Direção vertical aleatória
+            "direction_y": direction_y  # Direção vertical aleatória
         }
         self.zombies.append(zombie)
         self.update_zombie_counter()  # Atualiza o contador
@@ -60,6 +62,7 @@ class ZombieGame(QLabel):
 
     def update_zombies(self):
         """Atualiza a posição dos zumbis e garante que não saiam da tela."""
+        visible_height = self.height() - self.zombie_counter_label.height() # Ajuste para área visível
         for zombie in self.zombies:
             zombie["position"].setX(zombie["position"].x() + zombie["speed_x"] * zombie["direction_x"])
             zombie["position"].setY(zombie["position"].y() + zombie["speed_y"] * zombie["direction_y"])
@@ -78,8 +81,8 @@ class ZombieGame(QLabel):
                 zombie["position"].setY(0)
                 zombie["direction_y"] = 1
 
-            if zombie["position"].y() > self.height():
-                zombie["position"].setY(self.height())
+            if zombie["position"].y() > visible_height:
+                zombie["position"].setY(visible_height)
                 zombie["direction_y"] = -1
 
         self.repaint()
@@ -102,9 +105,11 @@ def run_zombies():
     dock = QDockWidget("Zombie Survival", mw)
     dock.setWidget(game_window)  # Adiciona o game_window ao dock
     dock.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)  # Define as áreas permitidas
+    dock.setMinimumHeight(200)
 
     # Adiciona o dock widget à janela principal
     mw.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, dock)
+
 
     # Spawn 5 zumbis
     for _ in range(5):
