@@ -17,9 +17,19 @@ class ZombieGame(QLabel):
         # Configurando o fundo
         self.setPixmap(QPixmap("./ankiSurvival/assets/background.png"))
 
+        # Adicionando o contador de zumbis
+        self.zombie_counter_label = QLabel(self)
+        self.zombie_counter_label.setStyleSheet("color: white; font-size: 16px; background-color: rgba(0, 0, 0, 0.2); padding: 5px; border-radius: 16px")
+        self.zombie_counter_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.zombie_counter_label.setGeometry(10, 10, 90, 40)  # Posição e tamanho do contador
+        self.update_zombie_counter()  # Inicializa o contador
+
+    def update_zombie_counter(self):
+        """Atualiza o texto do contador de zumbis."""
+        self.zombie_counter_label.setText(f"Zumbis: {len(self.zombies)}")
+
     def spawn_zombie(self):
         """Adiciona um novo zumbi na tela com direção aleatória em X e Y."""
-        # Direção aleatória para o movimento em X e Y
         direction_x = random.choice([-1, 1])  # Direção horizontal (esquerda ou direita)
         direction_y = random.choice([-1, 1])  # Direção vertical (cima ou baixo)
         zombie = {
@@ -30,12 +40,14 @@ class ZombieGame(QLabel):
             "direction_y": direction_y   # Direção vertical aleatória
         }
         self.zombies.append(zombie)
+        self.update_zombie_counter()  # Atualiza o contador
         print(f"Zumbi spawnado: {len(self.zombies)} zumbis atualmente.")  # Depuração
 
     def delete_zombie(self):
         """Remove o último zumbi da lista, se houver algum."""
         if self.zombies:
             self.zombies.pop()
+            self.update_zombie_counter()  # Atualiza o contador
             print(f"Zumbi removido! Restam {len(self.zombies)} zumbis.")
         else:
             print("Nenhum zumbi para remover.")  # Depuração
@@ -43,27 +55,26 @@ class ZombieGame(QLabel):
     def update_zombies(self):
         """Atualiza a posição dos zumbis e garante que não saiam da tela."""
         for zombie in self.zombies:
-            # Movimento aleatório em X e Y
             zombie["position"].setX(zombie["position"].x() + zombie["speed_x"] * zombie["direction_x"])
             zombie["position"].setY(zombie["position"].y() + zombie["speed_y"] * zombie["direction_y"])
 
             # Garantir que o zumbi não saia da tela horizontalmente
-            if zombie["position"].x() < 0:  # Se o zumbi estiver saindo da tela pela esquerda
+            if zombie["position"].x() < 0:
                 zombie["position"].setX(0)
-                zombie["direction_x"] = 1  # Muda a direção para a direita
+                zombie["direction_x"] = 1
 
-            if zombie["position"].x() > self.width():  # Se o zumbi estiver saindo da tela pela direita
+            if zombie["position"].x() > self.width():
                 zombie["position"].setX(self.width())
-                zombie["direction_x"] = -1  # Muda a direção para a esquerda
+                zombie["direction_x"] = -1
 
             # Garantir que o zumbi não saia da tela verticalmente
-            if zombie["position"].y() < 0:  # Se o zumbi estiver saindo da tela pela parte superior
+            if zombie["position"].y() < 0:
                 zombie["position"].setY(0)
-                zombie["direction_y"] = 1  # Muda a direção para baixo
+                zombie["direction_y"] = 1
 
-            if zombie["position"].y() > self.height():  # Se o zumbi estiver saindo da tela pela parte inferior
+            if zombie["position"].y() > self.height():
                 zombie["position"].setY(self.height())
-                zombie["direction_y"] = -1  # Muda a direção para cima
+                zombie["direction_y"] = -1
 
         self.repaint()
 
