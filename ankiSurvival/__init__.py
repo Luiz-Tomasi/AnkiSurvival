@@ -2,7 +2,7 @@ from aqt import mw
 from aqt import gui_hooks
 import random
 from PyQt6.QtWidgets import QLabel, QMainWindow, QDockWidget
-from PyQt6.QtGui import QPainter, QPixmap
+from PyQt6.QtGui import QPainter, QPixmap, QMovie, QBrush
 from PyQt6.QtCore import Qt, QTimer, QPoint
 
 
@@ -14,8 +14,10 @@ class ZombieGame(QLabel):
         self.timer.timeout.connect(self.update_zombies)
         self.timer.start(50)  # Atualiza a cada 50ms
 
-        # Configurando o fundo
-        self.setPixmap(QPixmap("./ankiSurvival/assets/background.png"))
+        palette = self.palette()
+        palette.setBrush(self.backgroundRole(), QBrush(QPixmap("./ankiSurvival/assets/background.png")))
+        self.setPalette(palette)
+        self.setAutoFillBackground(True)
 
         # Adicionando o contador de zumbis
         self.zombie_counter_label = QLabel(self)
@@ -23,6 +25,10 @@ class ZombieGame(QLabel):
         self.zombie_counter_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         self.zombie_counter_label.setGeometry(10, 10, 90, 40)  # Posição e tamanho do contador
         self.update_zombie_counter()  # Inicializa o contador
+
+        # Configurando o GIF do zumbi como QMovie
+        self.zombie_movie = QMovie("./ankiSurvival/assets/Zombie.gif")
+        self.zombie_movie.start()  # Inicia a animação do GIF
 
     def update_zombie_counter(self):
         """Atualiza o texto do contador de zumbis."""
@@ -81,13 +87,11 @@ class ZombieGame(QLabel):
     def paintEvent(self, event):
         """Desenha os zumbis na tela."""
         painter = QPainter(self)
-        zombie_pixmap = QPixmap("./ankiSurvival/assets/Zombie.gif")
-
-        if zombie_pixmap.isNull():
-            print("Erro ao carregar a imagem do zumbi!")  # Depuração
 
         for zombie in self.zombies:
-            painter.drawPixmap(zombie["position"], zombie_pixmap)
+            # Desenha a posição atual do frame do GIF usando QMovie
+            current_frame = self.zombie_movie.currentPixmap()
+            painter.drawPixmap(zombie["position"], current_frame)
 
 
 def run_zombies():
